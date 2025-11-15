@@ -18,7 +18,7 @@ client = gspread.authorize(creds)
 
 # Replace with your Journal Google Sheet ID
 JOURNAL_SHEET_ID = st.secrets["journal_data_sheet_id"]
-journal_ws = client.open_by_key(JOURNAL_SHEET_ID).worksheet("Entries")
+journal_ws = client.open_by_key(JOURNAL_SHEET_ID).worksheet("Journal-Data-wo-link")
 
 # ---- Simulated login (replace with your login app) ----
 if "user_email" not in st.session_state:
