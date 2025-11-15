@@ -115,7 +115,7 @@ st.set_page_config(page_title="Nature Counter Analytics Hub", layout="centered")
 # Display logo
 col1, col2, col3 = st.columns([1.5,2,1])
 with col2:
-    st.image("StreamlitProd/logo.png", width=180)
+    st.image("logo.png", width=180)
 
 # Centered Title
 st.markdown("<h1 style='text-align: center;'>🌿 Nature Counter Analytics Hub</h1>", unsafe_allow_html=True)
