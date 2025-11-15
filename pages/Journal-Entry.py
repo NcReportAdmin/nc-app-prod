@@ -17,7 +17,7 @@ creds = Credentials.from_service_account_info(
 client = gspread.authorize(creds)
 
 # Replace with your Journal Google Sheet ID
-JOURNAL_SHEET_ID = st.secrets["journal_sheet_id"]
+JOURNAL_SHEET_ID = st.secrets["journal_data_sheet_id"]
 journal_ws = client.open_by_key(JOURNAL_SHEET_ID).worksheet("Entries")
 
 # ---- Simulated login (replace with your login app) ----
