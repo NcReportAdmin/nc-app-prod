@@ -8,6 +8,7 @@ from google.oauth2.service_account import Credentials
 import pandas as pd
 from datetime import datetime, timedelta
 import requests
+import pytz
 
 
 # ================================
@@ -94,8 +95,12 @@ st.title("🌿 Nature Journal Entry")
 # ========================================================
 # Date,Time and Duration FIELDS
 # ========================================================
-ts_date = st.date_input("Select date", value=datetime.today())
-ts_time = st.time_input("Select time", value=datetime.now().time())
+
+# Timezone San Francisco time (PT)
+pacific = pytz.timezone("America/Los_Angeles")
+
+ts_date = st.date_input("Select date", value=datetime.now(pacific))
+ts_time = st.time_input("Select time", value=datetime.now(pacific).time())
 n_duration = st.number_input("Duration (minutes)", min_value=1, max_value=1440, step=5,key="duration_field")
 
 # -------------------------------
