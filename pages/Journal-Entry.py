@@ -89,7 +89,10 @@ st.session_state.setdefault("user_name", "Test User")
 # =====================================
 # 6. LIVE Journal UI
 # =====================================
-st.title("🌿 Nature Journal Entry")
+st.markdown(
+    "<h1 style='font-size: 32px;'>🌿 Nature Counter Journal Entry (via Web)</h1>",
+    unsafe_allow_html=True
+)
 
 
 # ========================================================

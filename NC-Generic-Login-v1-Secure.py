@@ -110,7 +110,7 @@ def load_data_from_sheets(sheet_id, sheet_name=None, header_row=0):
         return pd.DataFrame()
 
 # Streamlit UI
-st.set_page_config(page_title="Nature Counter Analytics Hub", layout="centered")
+st.set_page_config(page_title="Nature Counter Journal Entry (via Web)", layout="centered")
 
 # Display logo
 col1, col2, col3 = st.columns([1.5,2,1])
@@ -118,7 +118,7 @@ with col2:
     st.image("logo.png", width=180)
 
 # Centered Title
-st.markdown("<h1 style='text-align: center;'>🌿 Nature Counter Analytics Hub</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; font-size: 36px;'>🌿 Nature Counter Journal Entry (via Web)</h1>", unsafe_allow_html=True)
 
 # Add security notice
 st.markdown("### Secure Login Portal")
