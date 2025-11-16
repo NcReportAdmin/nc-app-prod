@@ -4,7 +4,7 @@ import streamlit as st
 import gspread
 from google.oauth2.service_account import Credentials
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # ---- Google Sheets setup ----
 scope = [
@@ -48,19 +48,57 @@ with st.form("journal_form"):
 
     submitted = st.form_submit_button("Submit Entry")
 
+    # if submitted:
+    #     new_entry = [
+    #         st.session_state["user_name"],
+    #         st.session_state["user_email"],
+    #         str(timestamp),
+    #         n_duration,
+    #         n_name,
+    #         zip_code,
+    #         country,
+    #         ", ".join(activities),
+    #         jnotes,
+    #         city,
+    #         state
+    #     ]
+    #     journal_ws.append_row(new_entry)
+    #     st.success("✅ Journal entry saved!")
+
     if submitted:
+        # Combine date + time into a single datetime
+        timestamp = datetime.combine(ts_date, ts_time)
+
+        # Compute End Date Time from duration
+        end_dt = timestamp + timedelta(minutes=int(n_duration))
+
+        # Build a nice n_Place string
+        n_place = f"{n_name}, {city} {state} {country}".strip().replace("  ", " ")
+
+        # Activities as comma-separated text
+        activities_str = ", ".join(activities)
+
+        # Build row in EXACT column order of the sheet:
         new_entry = [
-            st.session_state["user_name"],
-            st.session_state["user_email"],
-            str(timestamp),
-            n_duration,
-            n_name,
-            zip_code,
-            country,
-            ", ".join(activities),
-            jnotes,
-            city,
-            state
+            "",                               # Status (blank for now)
+            st.session_state["user_name"],    # User Name
+            st.session_state["user_email"],   # User email
+            timestamp.strftime("%m/%d/%y %I:%M %p"),  # Timestamp
+            n_duration,                       # n_Duration
+            end_dt.strftime("%m/%d/%y %I:%M %p"),     # End Date Time
+            n_name,                           # n_Name
+            city,                             # City
+            state,                            # State
+            zip_code,                         # Zip
+            country,                          # Country
+            n_place,                          # n_Place
+            "",                               # n_Lati (no data yet)
+            "",                               # n_Long (no data yet)
+            "",                               # n_park_nbr (no data yet)
+            activities_str,                   # n_activity
+            jnotes                            # n_notes
         ]
-        journal_ws.append_row(new_entry)
+
+        journal_ws.append_row(new_entry, value_input_option="USER_ENTERED")
         st.success("✅ Journal entry saved!")
+
