@@ -1,90 +1,80 @@
 
-# jm-nc-dashboard
+# 🌿 Nature Counter — Journal Entry App
 
-Streamlit app for Nature Counter Health Outcome and Journal reporting.
+A Streamlit-based application for recording and managing Nature Counter journal entries.  
+This app allows authorized users to log time spent in nature along with location, duration, and activity details.
 
-## pages
-- 📊 Health Outcome Reports
-- 📓 Journal Reports
-- Seamspace Emotion Reports (Pending; excluded from current version)
+---
 
-## How to Run
-streamlit run NC-Generic-Loin-v1.py
-Only authorized users can access based on permissions.csv.
+## 📁 Project Structure
 
+### **Pages**
+- 📓 **Journal-Entry.py** — Main journal entry submission form  
+- (Additional pages can be added inside the `pages/` folder)
 
-## Notes
+---
 
-- More notes to be added
+## 🌐 Live Application
 
-Prefered structure should look like this:
-Main –
-Dashboard (branch/project)
-Master # Master will call different sub = HO , Journal, and Seamspace, but they should all be under folder “Pages”
-| generic login
-| permission.cvs
-| readme
-| ignore
-- are we supposed to have data source in Master? Can it be in folder, called “Source”
-- === here are the data source at this time ==
-| HO data (HealthOutcome Data)
-| Journal data
-| Seamspace data
-pages
-- === These are the HO codes ===
-| HO 1.py
-| HO 2.py
-- can “| HO data” reside here?? Or should it be in “Master”
-- === These are the Journal codes ===
-| Journal 1.py
-- can | Journal data reside here?? Or should it be in “Master”
-- === T These are the Seamspace (my client) codes ===
-| Seamspace 1.py
-- can | Seamspace data reside here?? Or should it be in “Master”
+You can access the production Streamlit app here:
 
-Intake (as separate project/branch)
-| intake login
-| permission.cvs
-| readme
-| ignore
-pages
-|Intake-view-update.py
-|Intake-data
+🔗 **https://nc-app.streamlit.app/**
 
-Prefered structure should look like this: <br>
-Main – <br>
-      Dashboard (branch/project) <br>
-      Master    # Master will call different sub = HO , Journal, and Seamspace, but they should all be under folder “Pages” <br>
-        | generic login <br>
-        | permission.cvs <br>
-        | readme <br>
-        | ignore <br>
-        # are we supposed to have data source in Master? Can it be in folder, called “Source” <br>
-        # === here are the data source at this time == <br>
-         | HO data  (HealthOutcome Data) <br>
-         | Journal data <br>
-         | Seamspace data <br>
-        Pages <br>
-             # === These are the HO codes === <br>
-            | HO 1.py <br>
-            | HO 2.py  <br>
-            # can “| HO data” reside here?? Or should it be in “Master” <br>
-            # === These are the Journal codes === <br>
-            | Journal 1.py <br>
-            # can | Journal data reside here?? Or should it be in “Master” <br>
-            # === T These are the Seamspace (my client) codes === <br>
-            | Seamspace 1.py <br>
-           # can | Seamspace data reside here?? Or should it be in “Master” <br> \
+> ⚠️ *Only authorized users can log in.*  
+> Access permissions are managed using Google Sheets (via `permissions_sheet_id` stored in Streamlit secrets).
 
-   Intake (as separate project/branch) <br>
-        | intake login  <br>
-        | permission.cvs <br>
-        | readme <br>
-        | ignore <br>
-         Pages <br>
-             |Intake-view-update.py <br>
-             |Intake-data <br>
+---
 
->>>>>>> 08985fbb44ea5f2aa393ecccfdb8b44f971449cc
+## 🛠 Running the App Locally
 
+Follow the steps below to run the app on your local machine.
 
+### **1️⃣ Clone this repository**
+```bash
+git clone https://github.com/NcReportAdmin/nc-app-prod
+cd nc-app-prod
+```
+
+### **2️⃣ Create local secrets file**
+
+Streamlit loads sensitive data from:
+
+```
+.streamlit/secrets.toml
+```
+
+Create this file on your local machine:
+
+- In VS Code, right-click the project → **New Folder** → name it `.streamlit`
+- Inside `.streamlit`, create a new file named `secrets.toml`
+- Paste the same secrets used in your Streamlit Cloud deployment  
+  *(Google Service Account, sheet IDs, etc.)*
+
+Make sure `.streamlit/secrets.toml` is **NOT committed to GitHub** (add it to `.gitignore`).
+
+---
+
+### **3️⃣ Install dependencies**
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+### **4️⃣ Run the application**
+
+```bash
+streamlit run NC-Generic-Login-v1-Secure.py
+```
+---
+
+## 🧩 Notes for developers
+
+- This app requires a valid **Google Service Account** with access to:
+  - Permission sheet
+  - Journal data sheet
+  - Other sheets defined in `secrets.toml`
+- All journal entries are automatically written to the connected Google Sheet.
+
+---
