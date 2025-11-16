@@ -22,7 +22,25 @@ JOURNAL_SHEET_ID = st.secrets["journal_data_sheet_id"]
 journal_ws = client.open_by_key(JOURNAL_SHEET_ID).worksheet("Journal")
 
 journal_df = pd.DataFrame(journal_ws.get_all_records())
-existing_places = sorted([p for p in journal_df["n_Name"].unique() if p])
+
+def col(df, name):
+    """Find column in df regardless of spacing or case."""
+    for c in df.columns:
+        if c.strip().lower() == name.strip().lower():
+            return c
+    return None
+
+zip_col = col(journal_df, "Zip")
+city_col = col(journal_df, "City")
+state_col = col(journal_df, "State")
+country_col = col(journal_df, "Country")
+name_col = col(journal_df, "n_Name")
+
+existing_places = sorted([p for p in journal_df[name_col].unique() if p])
+
+# Session state defaults
+for key in ["n_name", "zip_code", "city", "state", "country"]:
+    st.session_state.setdefault(key, "")
 
 # ---- Simulated login (replace with your login app) ----
 if "user_email" not in st.session_state:
@@ -57,56 +75,45 @@ with st.form("journal_form"):
     use_zip_lookup = True  # will disable when loading from existing data
 
     # --------------------------------------------------------
-    # CASE 1: User selected an existing place
+    # CASE 1 — Existing Place Selected
     # --------------------------------------------------------
     if place_selection != "-- Add New Place --":
         st.session_state.n_name = place_selection
 
-        prev_rows = journal_df[journal_df["n_Name"] == place_selection]
+        prev = journal_df[journal_df[name_col] == place_selection]
 
-        if not prev_rows.empty:
-            latest = prev_rows.iloc[-1]
+        if not prev.empty:
+            latest = prev.iloc[-1]
 
-            # Save to session_state so values persist during rerun
-            st.session_state.zip_code = latest.get("Zip", "")
-            st.session_state.city = latest.get("City", "")
-            st.session_state.state = latest.get("State", "")
-            st.session_state.country = latest.get("Country", "")
+            st.session_state.zip_code = latest[zip_col]
+            st.session_state.city = latest[city_col]
+            st.session_state.state = latest[state_col]
+            st.session_state.country = latest[country_col]
 
-            st.info(f"Auto-filled based on previous visits to **{place_selection}**.")
-
-        # --- show fields immediately ---
         st.session_state.zip_code = st.text_input("Zip Code", value=st.session_state.zip_code)
-        st.session_state.city = st.text_input("City", value=st.session_state.city)
-        st.session_state.state = st.text_input("State", value=st.session_state.state)
-        st.session_state.country = st.text_input("Country", value=st.session_state.country)
+        st.session_state.city     = st.text_input("City",     value=st.session_state.city)
+        st.session_state.state    = st.text_input("State",    value=st.session_state.state)
+        st.session_state.country  = st.text_input("Country",  value=st.session_state.country)
 
     # --------------------------------------------------------
-    # CASE 2: User adding a new place
+    # CASE 2 — Add New Place (ZIP Lookup)
     # --------------------------------------------------------
     else:
         st.session_state.n_name = st.text_input("Enter New Place Name", value=st.session_state.n_name)
-
         st.session_state.zip_code = st.text_input("Zip Code", value=st.session_state.zip_code)
 
-        # ZIP lookup if 5-digit ZIP provided
-        if st.session_state.zip_code and len(st.session_state.zip_code) == 5:
+        if len(st.session_state.zip_code) == 5:
             try:
-                response = requests.get(f"https://api.zippopotam.us/us/{st.session_state.zip_code}")
-                if response.status_code == 200:
-                    data = response.json()
-
-                    st.session_state.country = data.get("country", "")
+                r = requests.get(f"https://api.zippopotam.us/us/{st.session_state.zip_code}")
+                if r.status_code == 200:
+                    data = r.json()
+                    st.session_state.country = data["country"]
                     st.session_state.state = data["places"][0]["state abbreviation"]
-
-                    city_list = sorted({p["place name"] for p in data["places"]})
-                    st.session_state.city = st.selectbox("City", city_list, index=0)
-                else:
-                    st.warning("ZIP not found.")
+                    cities = sorted({p["place name"] for p in data["places"]})
+                    st.session_state.city = st.selectbox("City", cities)
             except:
-                st.error("ZIP lookup failed.")
+                pass
 
-        # If lookup didn't run yet, show editable boxes
         if not st.session_state.city:
             st.session_state.city = st.text_input("City", value=st.session_state.city)
         if not st.session_state.state:
