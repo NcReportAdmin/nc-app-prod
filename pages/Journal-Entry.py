@@ -21,7 +21,6 @@ client = gspread.authorize(creds)
 JOURNAL_SHEET_ID = st.secrets["journal_data_sheet_id"]
 journal_ws = client.open_by_key(JOURNAL_SHEET_ID).worksheet("Journal")
 
-
 journal_df = pd.DataFrame(journal_ws.get_all_records())
 existing_places = sorted([p for p in journal_df["n_Name"].unique() if p])
 
@@ -57,62 +56,63 @@ with st.form("journal_form"):
     zip_code = ""
     use_zip_lookup = True  # will disable when loading from existing data
 
-    # === CASE 1: User selected an existing place ===
+    # --------------------------------------------------------
+    # CASE 1: User selected an existing place
+    # --------------------------------------------------------
     if place_selection != "-- Add New Place --":
-        n_name = place_selection
+        st.session_state.n_name = place_selection
 
-        # Filter past rows for this place
         prev_rows = journal_df[journal_df["n_Name"] == place_selection]
 
         if not prev_rows.empty:
-            # Use the most recent entry to populate details
             latest = prev_rows.iloc[-1]
 
-            city = latest.get("City", "")
-            state = latest.get("State", "")
-            zip_code = latest.get("Zip", "")
-            country = latest.get("Country", "")
+            # Save to session_state so values persist during rerun
+            st.session_state.zip_code = latest.get("Zip", "")
+            st.session_state.city = latest.get("City", "")
+            st.session_state.state = latest.get("State", "")
+            st.session_state.country = latest.get("Country", "")
 
-            st.success(f"Auto-filled based on previous visits to **{place_selection}**.")
+            st.info(f"Auto-filled based on previous visits to **{place_selection}**.")
 
-            # Show fields (editable if needed)
-            zip_code = st.text_input("Zip Code", value=zip_code)
-            city = st.text_input("City", value=city)
-            state = st.text_input("State", value=state)
-            country = st.text_input("Country", value=country)
+        # --- show fields immediately ---
+        st.session_state.zip_code = st.text_input("Zip Code", value=st.session_state.zip_code)
+        st.session_state.city = st.text_input("City", value=st.session_state.city)
+        st.session_state.state = st.text_input("State", value=st.session_state.state)
+        st.session_state.country = st.text_input("Country", value=st.session_state.country)
 
-            use_zip_lookup = False  # Don't use API lookup
-
-    # === CASE 2: User is adding a new place ===
+    # --------------------------------------------------------
+    # CASE 2: User adding a new place
+    # --------------------------------------------------------
     else:
-        n_name = st.text_input("Enter New Place Name")
+        st.session_state.n_name = st.text_input("Enter New Place Name", value=st.session_state.n_name)
 
-        zip_code = st.text_input("Zip Code")
+        st.session_state.zip_code = st.text_input("Zip Code", value=st.session_state.zip_code)
 
-        # Only run ZIP lookup if user enters exactly 5 digits
-        if zip_code and len(zip_code) == 5:
+        # ZIP lookup if 5-digit ZIP provided
+        if st.session_state.zip_code and len(st.session_state.zip_code) == 5:
             try:
-                response = requests.get(f"https://api.zippopotam.us/us/{zip_code}")
-
+                response = requests.get(f"https://api.zippopotam.us/us/{st.session_state.zip_code}")
                 if response.status_code == 200:
                     data = response.json()
-                    country = data.get("country", "")
-                    state = data["places"][0]["state abbreviation"]
-                    city_options = sorted({p["place name"] for p in data["places"]})
 
-                    city = st.selectbox("City", city_options)
+                    st.session_state.country = data.get("country", "")
+                    st.session_state.state = data["places"][0]["state abbreviation"]
+
+                    city_list = sorted({p["place name"] for p in data["places"]})
+                    st.session_state.city = st.selectbox("City", city_list, index=0)
                 else:
-                    st.warning("Invalid ZIP code or not found.")
-            except Exception as e:
-                st.error(f"ZIP code lookup failed: {e}")
+                    st.warning("ZIP not found.")
+            except:
+                st.error("ZIP lookup failed.")
 
-        # If API lookup didn't run yet
-        if not city:
-            city = st.text_input("City")
-        if not state:
-            state = st.text_input("State")
-        if not country:
-            country = st.text_input("Country")
+        # If lookup didn't run yet, show editable boxes
+        if not st.session_state.city:
+            st.session_state.city = st.text_input("City", value=st.session_state.city)
+        if not st.session_state.state:
+            st.session_state.state = st.text_input("State", value=st.session_state.state)
+        if not st.session_state.country:
+            st.session_state.country = st.text_input("Country", value=st.session_state.country)
 
     # Read-only state/country
     #st.text_input("State", state, disabled=True)
