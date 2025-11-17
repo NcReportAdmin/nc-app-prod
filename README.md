@@ -2,7 +2,7 @@
 # 🌿 Nature Counter — Journal Entry App
 
 A Streamlit-based application for recording and managing Nature Counter journal entries.  
-This app allows authorized users to log time spent in nature along with location, duration, and activity details.
+This app allows users to log time spent in nature along with location, duration, and activity details.
 
 ---
 
@@ -20,8 +20,8 @@ You can access the production Streamlit app here:
 
 🔗 **https://nc-app.streamlit.app/**
 
-> ⚠️ *Only authorized users can log in.*  
-> Access permissions are managed using Google Sheets (via `permissions_sheet_id` stored in Streamlit secrets).
+> ⚠️ *Only registered users can log the time spent, User may self register using this app*  
+> Registered users are managed using Google Sheets (via `mNC_account_master_sheet_id` stored in Streamlit secrets).
 
 ---
 

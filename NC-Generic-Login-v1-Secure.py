@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import gspread
 from google.oauth2.service_account import Credentials
+from datetime import datetime
+import pytz
 
 def get_google_sheets_client():
     """
@@ -43,7 +45,7 @@ def load_permissions():
             return pd.DataFrame()
         
         # Get the Google Sheet ID from secrets
-        sheet_id = st.secrets["permissions_sheet_id"]
+        sheet_id = st.secrets["mNC_account_master_sheet_id"]
         
         # Open the sheet
         sheet = client.open_by_key(sheet_id)
@@ -109,6 +111,29 @@ def load_data_from_sheets(sheet_id, sheet_name=None, header_row=0):
         st.error(f"Failed to load data from Google Sheets: {str(e)}")
         return pd.DataFrame()
 
+# user_id generation Helper function
+def user_id(email: str):
+    """
+    Generates Gen_app_id as:
+    62 + YYYY + first4(email) + MMDD
+    Example:
+        email 'john.doe@x.com', date 2025-02-03
+        -> 622025john0203
+    """
+
+    # 1. First 4 characters of email (letters/numbers only)
+    clean_email = "".join([c for c in email if c.isalnum()])
+    prefix = clean_email[:4].lower().ljust(4, "x")  # ensures at least 4 chars
+
+    # 2. Today's date
+    today = datetime.now(pacific)
+    yyyy = today.strftime("%Y")
+    mmdd = today.strftime("%m%d")
+
+    # 3. Combine
+    return f"62{yyyy}{prefix}{mmdd}"
+
+
 # Streamlit UI
 st.set_page_config(page_title="Nature Counter Journal Entry (via Web)", layout="centered")
 
@@ -117,6 +142,14 @@ col1, col2, col3 = st.columns([1.5,2,1])
 with col2:
     st.image("logo.png", width=180)
 
+# Timezone San Francisco time (PT)
+pacific = pytz.timezone("America/Los_Angeles")
+
+if 'user_name' not in st.session_state:
+    st.session_state['user_name'] = None
+    st.session_state["user_role"] = None
+
+
 # Centered Title
 st.markdown("<h1 style='text-align: center; font-size: 36px;'>🌿 Nature Counter Journal Entry (via Web)</h1>", unsafe_allow_html=True)
 
@@ -124,7 +157,7 @@ st.markdown("<h1 style='text-align: center; font-size: 36px;'>🌿 Nature Counte
 st.markdown("### Secure Login Portal")
 # st.info("🔒 This dashboard uses secure authentication via Google Sheets.")
 
-email = st.text_input("Enter your email:", placeholder="example@company.com").strip().lower()
+email = st.text_input("Enter your email to login", placeholder="namexyz@gmail.com").strip().lower()
 
 if email:
     with st.spinner("Authenticating..."):
@@ -136,27 +169,89 @@ if email:
     
     # Check if email exists
     match = permissions[permissions["email"] == email]
-    
-    if match.empty:
-        st.error("Email not found. Access denied.")
-        st.error("Please contact your administrator if you believe this is an error.")
-    else:
-        # Store user data in session state
+
+    # ---------------------- EXISTING USER ----------------------
+    if not match.empty:
         user_data = match.iloc[0]
         st.session_state["user_email"] = email
         st.session_state["user_role"] = user_data["role"]
-        st.session_state["user_name"] = user_data.get("name", "User")
+        st.session_state["user_name"] = user_data.get("ho_username", "User")
         st.session_state["authenticated"] = True
-        
-        st.success(f"Welcome {st.session_state['user_name']}! You are logged in as: {user_data['role']}")
-        st.info("Please use the sidebar to view your dashboard.")
-        
-        # Optional: Show last login time or other info
-        st.write(f"**Logged in as:** {email} | **Role:** {user_data['role']}")
 
+        st.success(f"Welcome back, {st.session_state['user_name']}!")
+        #st.info("You are now logged in.")
+        #st.write(f"**You are now Logged in as:** {email} | **Role:** {user_data['role']}")
+    
+    # ---------------------- NEW USER → REGISTRATION ----------------------
+    else:
+        st.warning("Email not found. Please register.")
+
+        with st.form("registration_form"):
+            username = st.text_input("Your Name")
+            preferred_lang = st.selectbox("Preferred Language", ["en", "es", "ko", "hi"])
+            
+            submit_reg = st.form_submit_button("Register")
+
+            if submit_reg:
+                if not username:
+                    st.error("Name is required.")
+                    st.stop()
+
+                # ---- Append to registration Google Sheet ----
+                try:
+                    client = get_google_sheets_client()
+                    reg_sheet_id = st.secrets["mNC_account_master_sheet_id"]
+                    reg_ws = client.open_by_key(reg_sheet_id).worksheet("Sheet1")
+                    generated_user_id = user_id(email)
+
+                    new_row = [
+                        email,
+                        username,
+                        "user",        # role
+                        "", # Gen_app_id
+                        generated_user_id, # user_id
+                        "", #LMS_app_id
+                        preferred_lang,
+                        datetime.now(pacific).strftime("%Y-%m-%d"),  # NC date
+                        "", "", "", "", "",                  # HO, LMS, App4, App5, group_id
+                        "Journal Entry (via Web)",                                # source
+                        datetime.now(pacific).strftime("%Y-%m-%d")   # date merged
+                    ]
+
+                    reg_ws.append_row(new_row)
+
+                    st.success("Registration successful! Logging you in...")
+
+                    # Auto-login
+                    st.session_state["user_email"] = email
+                    st.session_state["user_role"] = "user"
+                    st.session_state["user_name"] = username
+                    st.session_state["authenticated"] = True
+
+                    st.rerun()
+                    st.success(f"Welcome {st.session_state['user_name']}!")
+
+                except Exception as e:
+                    st.error(f"Failed to register: {e}")
+    
+    # if match.empty:
+    #     st.error("Email not found. Access denied.")
+    #     st.error("Please contact your administrator if you believe this is an error.")
+    # else:
+    #     # Store user data in session state
+    #     user_data = match.iloc[0]
+    #     st.session_state["user_email"] = email
+    #     st.session_state["user_role"] = user_data["role"]
+    #     st.session_state["user_name"] = user_data.get("name", "User")
+    #     st.session_state["authenticated"] = True
+
+if st.session_state['user_name'] is not None:        
+    st.info("Please use the sidebar to access the App.")
+st.write("---")     
+st.write(f"**You are Logged in as:** {st.session_state['user_name']} | **Role:** {st.session_state["user_role"]}")
 # Show logout button if authenticated
 if st.session_state.get("authenticated", False):
-    st.write("---")
+    
     if st.button("🚪 Logout"):
         for key in ["user_email", "user_role", "user_name", "authenticated"]:
             if key in st.session_state:
