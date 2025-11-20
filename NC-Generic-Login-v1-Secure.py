@@ -204,20 +204,33 @@ if email:
                     reg_ws = client.open_by_key(reg_sheet_id).worksheet("Sheet1")
                     generated_user_id = user_id(email)
 
-                    new_row = [
-                        email,
-                        username,
-                        "user",        # role
-                        "", # Gen_app_id
-                        generated_user_id, # user_id
-                        "", #LMS_app_id
-                        preferred_lang,
-                        datetime.now(pacific).strftime("%Y-%m-%d"),  # NC date
-                        "", "", "", "", "",                  # HO, LMS, App4, App5, group_id
-                        "Journal Entry (via Web)",                                # source
-                        datetime.now(pacific).strftime("%Y-%m-%d")   # date merged
-                    ]
+                    # Read header row
+                    headers = reg_ws.row_values(1)
 
+
+                    # Build a dictionary for the new row
+                    row_dict = {
+                        "email": email,
+                        "ho_username": username,
+                        "role": "user",
+                        "Gen_app_id": "",
+                        "user_id": generated_user_id,
+                        "LMS_app_id": "",
+                        "Prefer_Lang": preferred_lang,
+                        "NC-mApp": "",
+                        "NC-WebApp": datetime.now(pacific).strftime("%Y-%m-%d"),
+                        "HO": "",
+                        "LMS": "",
+                        "App_4": "",
+                        "App_5": "",
+                        "group_id": "",
+                        "source": "Journal Entry (via Web)",
+                        "date merged": datetime.now(pacific).strftime("%Y-%m-%d")
+                    }
+                    # Ensure the order of values matches the headers
+                    new_row = [row_dict.get(col, "") for col in headers]
+
+                    # Append the new row safely
                     reg_ws.append_row(new_row)
 
                     st.success("Registration successful! Logging you in...")
