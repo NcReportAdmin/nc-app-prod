@@ -85,7 +85,7 @@ def lookup_zip(zip_code):
 # st.session_state.setdefault("user_email", "test@example.com")
 # st.session_state.setdefault("user_name", "Test User")
 
-if st.session_state['user_name'] is not None:
+if st.session_state.get("user_name") is not None:
         
     # =====================================
     # 6. LIVE Journal UI
@@ -107,7 +107,7 @@ if st.session_state['user_name'] is not None:
     # Initialize only once
     if "ts_time" not in st.session_state:
         st.session_state.ts_time = datetime.now(pacific).time()
-    ts_time = st.time_input("Select time", value=st.session_state.ts_time,key="ts_time")
+    ts_time = st.time_input("Select time",key="ts_time")
     n_duration = st.number_input("Duration (minutes)", min_value=1, max_value=1440, step=5,key="duration_field")
 
     # -------------------------------
