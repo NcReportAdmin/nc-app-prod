@@ -211,14 +211,14 @@ if email:
                     # Build a dictionary for the new row
                     row_dict = {
                         "email": email,
-                        "ho_username": username,
+                        "username": username,
                         "role": "user",
                         "Gen_app_id": "",
                         "user_id": generated_user_id,
                         "LMS_app_id": "",
                         "Prefer_Lang": preferred_lang,
-                        "NC-mApp": "",
-                        "NC-WebApp": datetime.now(pacific).strftime("%Y-%m-%d"),
+                        "NC_mApp": "",
+                        "NC_WebApp": datetime.now(pacific).strftime("%Y-%m-%d"),
                         "HO": "",
                         "LMS": "",
                         "App_4": "",

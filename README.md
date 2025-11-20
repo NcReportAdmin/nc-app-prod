@@ -25,9 +25,9 @@ You can access the production Streamlit app here:
 
 ---
 
-## 🛠 Running the App Locally
+## 🛠 To Run App Locally
 
-Follow the steps below to run the app on your local machine.
+Follow the steps below to run this app on your local machine.
 
 ### **1️⃣ Clone this repository**
 ```bash
