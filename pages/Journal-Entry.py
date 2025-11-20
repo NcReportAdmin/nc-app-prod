@@ -104,7 +104,10 @@ if st.session_state['user_name'] is not None:
     pacific = pytz.timezone("America/Los_Angeles")
 
     ts_date = st.date_input("Select date", value=datetime.now(pacific))
-    ts_time = st.time_input("Select time", value=datetime.now(pacific).time())
+    # Initialize only once
+    if "ts_time" not in st.session_state:
+        st.session_state.ts_time = datetime.now(pacific).time()
+    ts_time = st.time_input("Select time", value=st.session_state.ts_time,key="ts_time")
     n_duration = st.number_input("Duration (minutes)", min_value=1, max_value=1440, step=5,key="duration_field")
 
     # -------------------------------
