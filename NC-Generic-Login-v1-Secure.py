@@ -175,12 +175,10 @@ if email:
         user_data = match.iloc[0]
         st.session_state["user_email"] = email
         st.session_state["user_role"] = user_data["role"]
-        st.session_state["user_name"] = user_data.get("ho_username", "User")
+        st.session_state["user_name"] = user_data.get("username", "User")
         st.session_state["authenticated"] = True
 
         st.success(f"Welcome back, {st.session_state['user_name']}!")
-        #st.info("You are now logged in.")
-        #st.write(f"**You are now Logged in as:** {email} | **Role:** {user_data['role']}")
     
     # ---------------------- NEW USER → REGISTRATION ----------------------
     else:
@@ -247,21 +245,12 @@ if email:
                 except Exception as e:
                     st.error(f"Failed to register: {e}")
     
-    # if match.empty:
-    #     st.error("Email not found. Access denied.")
-    #     st.error("Please contact your administrator if you believe this is an error.")
-    # else:
-    #     # Store user data in session state
-    #     user_data = match.iloc[0]
-    #     st.session_state["user_email"] = email
-    #     st.session_state["user_role"] = user_data["role"]
-    #     st.session_state["user_name"] = user_data.get("name", "User")
-    #     st.session_state["authenticated"] = True
 
 if st.session_state['user_name'] is not None:        
     st.info("Please use the sidebar to access the App.")
 st.write("---")     
 st.write(f"**You are Logged in as:** {st.session_state['user_name']} | **Role:** {st.session_state["user_role"]}")
+
 # Show logout button if authenticated
 if st.session_state.get("authenticated", False):
     
