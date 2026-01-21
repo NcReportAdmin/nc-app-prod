@@ -178,7 +178,7 @@ if st.session_state.get("user_name") is not None:
     # ========================================================
     # OTHER JOURNAL FIELDS
     # ========================================================
-    activities = st.multiselect("Activities", ["Walk", "Hike", "Garden", "Other"],key="activities_field")
+    activities = st.multiselect("Activities", ["Walk", "Hike", "Bike", "Run", "Swim", "Ski", "Garden", "Relax", "Explore", "Discover", "Other"],key="activities_field")
     jnotes = st.text_area("Journal Notes")
 
 
