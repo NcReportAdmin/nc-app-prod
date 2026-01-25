@@ -186,7 +186,22 @@ if email:
 
         with st.form("registration_form"):
             username = st.text_input("Your Name")
-            preferred_lang = st.selectbox("Preferred Language", ["en", "es", "ko", "hi"])
+            language_map = {
+                "English": "en",
+                "Korean": "ko",
+                "Chinese": "zh-CN",
+                "Spanish": "es",
+                "German": "de"
+            }
+            
+            selected_language = st.selectbox(
+                "Preferred Language",
+                options=list(language_map.keys())
+            )
+            
+            preferred_lang = language_map[selected_language]
+
+            # preferred_lang = st.selectbox("Preferred Language", ["en", "es", "ko", "hi"])
             
             submit_reg = st.form_submit_button("Register")
 
