@@ -70,7 +70,7 @@ def lookup_zip(zip_code):
             data = r.json()
             cities = sorted({p["place name"] for p in data["places"]})
             return {
-                "country": data["country"],
+                "country": data["country abbreviation"],
                 "state": data["places"][0]["state abbreviation"],
                 "cities": cities
             }
